@@ -17,7 +17,7 @@ the AI agent prompt generator, integration tests and deployment readiness.
 | Public catalogue | https://techinject-catalogue-juv3.vercel.app |
 | Admin dashboard | https://techinject-admin-juv3.vercel.app |
 | Repository | https://github.com/Juveriyahh/TechInject-Assignment |
-| **Deployed commit** | **`40b073a`** — both Vercel projects build from this commit on `main` |
+| **Deployed commit** | **`360fcf6`** — both Vercel projects build from this commit on `main` |
 | Written answers | [answers.md](answers.md) |
 | Deployment guide | [DEPLOYMENT.md](DEPLOYMENT.md) |
 
@@ -353,7 +353,8 @@ supplied with the brief. See [Time spent and known gaps](#time-spent-and-known-g
 
 ## Results from this build
 
-All commands run from the repository root on the deployed commit (`40b073a`).
+All commands run from the repository root on the deployed commit (`360fcf6`); the code under test is
+identical to `40b073a`, which added only documentation.
 
 ### Static checks
 
