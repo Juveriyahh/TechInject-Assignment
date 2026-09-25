@@ -10,6 +10,26 @@ the AI agent prompt generator, integration tests and deployment readiness.
 
 ---
 
+## Live deployment
+
+| Deliverable | Link |
+| --- | --- |
+| Public catalogue | https://techinject-catalogue-juv3.vercel.app |
+| Admin dashboard | https://techinject-admin-juv3.vercel.app |
+| Repository | https://github.com/Juveriyahh/TechInject-Assignment |
+| **Deployed commit** | **`40b073a`** — both Vercel projects build from this commit on `main` |
+| Written answers | [answers.md](answers.md) |
+| Deployment guide | [DEPLOYMENT.md](DEPLOYMENT.md) |
+
+Backend, database, auth and file storage all run on hosted Supabase
+(`rvlzfrdhmkuqavjnvxsi.supabase.co`); nothing in the deployed flow depends on a local machine. Both
+Vercel projects are linked to `main`, so every push redeploys automatically.
+
+**Test credentials are not in this repository.** The admin secret and the free/premium customer
+logins are supplied privately through the submission channel.
+
+---
+
 ## Workspace layout
 
 ```text
@@ -84,13 +104,18 @@ pnpm db:reset -- --yes              # drops the schema (destructive), then re-ru
 pnpm db:seed:rest -- --with-components
 ```
 
-Seeded accounts (password from `SEED_PASSWORD`, default `TechInject!2026`):
+Seeded accounts (the password comes from `SEED_PASSWORD`; set it yourself — no credential is
+committed to this repository):
 
 | Email | Role | Plan |
 | --- | --- | --- |
 | `admin@techinject.dev` | ADMIN | premium |
 | `free@example.com` | CUSTOMER | free |
 | `premium@example.com` | CUSTOMER | premium |
+
+> Credentials for the deployed instance (admin secret, free-customer and premium-customer logins) are
+> shared privately through the interview submission channel — never in this repository, the README or
+> any client bundle.
 
 ## 5. Run the apps
 
@@ -307,3 +332,208 @@ must be present at **runtime**.
 
 Publish the CLI with `pnpm --filter @tech-inject/cli build && pnpm --filter @tech-inject/cli publish
 --access public` (only `dist/` is included in the package).
+
+---
+
+## Screenshots
+
+| Image | What it shows |
+| --- | --- |
+| [`docs/screenshots/reference-sales-crm.png`](docs/screenshots/reference-sales-crm.png) | The Sales CRM reference the theme and table were extracted from |
+| `docs/screenshots/admin-components.png` | Recreation: admin components table — tags with `+N`, readiness meters, trend sparklines, summary footer |
+| `docs/screenshots/admin-customers.png` | Recreation: customers table with grant/revoke |
+| `docs/screenshots/catalogue-free.png` | Catalogue: free component — interactive preview and all three integration tabs unlocked |
+| `docs/screenshots/catalogue-premium-locked.png` | Catalogue: premium component as a free/anonymous viewer — blurred preview and "Upgrade to Premium" |
+| `docs/screenshots/catalogue-premium-unlocked.png` | Catalogue: same page as a premium customer — source, install command and agent prompt |
+
+Capture the recreation shots from the deployed URLs at ~1440 px wide; the reference image is the one
+supplied with the brief. See [Time spent and known gaps](#time-spent-and-known-gaps).
+
+---
+
+## Results from this build
+
+All commands run from the repository root on the deployed commit (`40b073a`).
+
+### Static checks
+
+| Command | Result |
+| --- | --- |
+| `pnpm test` | **130 passed** — shared 23, database 29, cli 21, catalogue 18, admin 39 |
+| `pnpm lint` | 6 / 6 workspace projects clean (`--max-warnings 0`) |
+| `pnpm typecheck` | 6 / 6 clean (`strict: true`) |
+| `pnpm build` | 6 / 6 tasks successful (both Next apps produce production builds) |
+
+### Deployed flow results
+
+Run against the **live** URLs, not a local server.
+
+| Check | Result |
+| --- | --- |
+| Catalogue `/`, both component pages, `/login`, `/account` | `200` |
+| Public component list | only published components; no file contents |
+| Free component source — anonymous | `200` |
+| Free component source — signed-in free customer | `200` |
+| Premium source — anonymous | `403`, zero source bytes in the body |
+| Premium source — signed-in **free** customer | `403`, zero source bytes |
+| Premium source — **premium** customer (cookie and bearer) | `200` with source |
+| Premium source — forged / expired token | `403` |
+| Unpublished or unknown slug (any caller, incl. premium) | `404` |
+| Premium page HTML contains the premium source | **no** (`grep -c` returns 0) — it only arrives via the gated API |
+| Admin `/` without a session | `307` to `/login` |
+| Admin API without credentials / with a wrong secret | `401` / `401` |
+| Admin API with the correct secret | `200` |
+| Admin response headers | `X-Robots-Tag: noindex, nofollow`, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy: no-referrer` |
+| Catalogue `/api/*` headers | `Cache-Control: no-store, private` |
+| Unpublish, then premium customer request | `404` immediately; `200` again after republish |
+| Revoke premium, same unchanged token | `200` then **`403`** then `200` after re-grant |
+| CLI against the deployed catalogue | free installs with no token; premium refused for a free customer; premium installs with a premium token |
+
+---
+
+## Premium access operations
+
+### Setting up accounts
+
+Customers are Supabase Auth users plus a row in `profiles`. `pnpm db:seed` (or `pnpm db:seed:rest`
+for a hosted project without the Postgres password) creates `admin@techinject.dev`,
+`free@example.com` and `premium@example.com`, with the password taken from `SEED_PASSWORD`.
+
+### Granting and revoking premium
+
+* **Dashboard:** Admin, then **Customers**, then **Grant** / **Revoke** on the row.
+* **API:**
+
+```bash
+curl -X PATCH https://<admin-domain>/api/users/<profile-id> \
+  -H "content-type: application/json" \
+  -H "x-admin-secret: $ADMIN_SECRET" \
+  -d '{"isPremium": true}'
+```
+
+Send `{"isPremium": false}` to revoke. Entitlement is read from `profiles` on every request, so the
+change applies to the **next** API call — the customer does not need to sign out or obtain a new
+token.
+
+### Authenticated installer usage
+
+```bash
+# Free component — no credentials needed
+TECH_INJECT_REGISTRY_URL=https://<catalogue-domain> npx @tech-inject/cli add crm-metric-card
+
+# Premium component — token copied from the catalogue's /account page
+TECH_INJECT_REGISTRY_URL=https://<catalogue-domain> npx @tech-inject/cli add crm-status-pill --token <access-token>
+```
+
+Without an entitled token the installer stops with `This component requires a premium plan… Pass
+--token <access-token> to authenticate.` and writes nothing.
+
+### Authenticated agent-prompt usage
+
+Open the component page, choose **Agent prompt**, then **Copy prompt** and paste it into Cursor,
+Copilot Chat or ChatGPT. The prompt is produced by the same gated endpoint as the source, so an
+unentitled viewer never receives one. Programmatically:
+
+```bash
+curl -H "Authorization: Bearer <access-token>" https://<catalogue-domain>/api/components/<slug>/source
+```
+
+The `agentPrompt` field of that JSON response is the prompt.
+
+---
+
+## Release checks and recovery plan
+
+### Before a release
+
+1. `pnpm check:env` — every required variable present; fails if a secret is exposed through a
+   `NEXT_PUBLIC_` variable.
+2. `pnpm lint && pnpm typecheck && pnpm test && pnpm build` — all six projects.
+3. Post-deploy smoke test against the deployed URLs: free source `200`, premium source `403` for
+   anonymous, `200` for a premium account, unpublished slug `404`, admin API `401` without the
+   secret.
+
+### If a deployment fails
+
+1. Read the Vercel build log for the failing project. Most monorepo failures are install/build-command
+   scoped, and both commands are pinned in `apps/*/vercel.json`.
+2. If the build succeeded but the app errors at runtime, check the Vercel runtime logs, then run
+   `pnpm check:env` against the same variables — a missing variable surfaces at runtime because every
+   Supabase-backed page is `force-dynamic`.
+3. **Restore service by promoting the last good deployment** (Vercel, Deployments, *Promote to
+   Production* / *Rollback*). This is instant and touches no data.
+4. If one component is at fault rather than the build, **unpublish it** instead of rolling back: it
+   disappears from the catalogue immediately while its rows and files stay intact.
+
+### Protecting stored component data
+
+* The source of truth is Postgres (`components`, `component_files`); every upload is additionally
+  archived as a raw JSON bundle in the **private** `component-bundles` bucket, so a component can be
+  rebuilt from storage if a row is damaged.
+* Deletes cascade only from `components` to `component_files`; unpublishing never deletes anything.
+* Supabase provides managed backups; before a risky schema change take a snapshot, and note that
+  `pnpm db:reset` is destructive and guarded behind an explicit `--yes`.
+* Secrets live only in Vercel project settings and a local gitignored `.env`. Rotating the Supabase
+  service-role key means updating both Vercel projects and redeploying.
+
+---
+
+## AI usage
+
+**Tool:** Claude (Claude Code, Opus) used as a pair-programmer throughout implementation.
+
+**One representative prompt** (abridged) — the Phase 2 brief, given as a single instruction:
+
+> Build the public component catalogue (`apps/catalogue`) with customer sign-in and free/premium
+> states, enforce premium access on the backend so premium source cannot leak to unauthorised users,
+> add an `npx` CLI installer with safe file writing, generate a per-component AI agent prompt, and
+> write integration tests proving `403` for anonymous and free users, `200` for free components and
+> `404` for unpublished components.
+
+**A suggestion I did not accept.** The obvious reading of "render the component using the
+`PREVIEW_FIXTURE`" is to compile and execute the uploaded fixture in the browser. I rejected it,
+because that runs publisher-supplied code on every visitor's page. The preview is instead driven by a
+vetted registry of first-party components fed with the declared `props_schema`
+(`apps/catalogue/src/lib/preview-registry.tsx`), and fixture code is displayed as text only.
+*Evidence:* the deployed premium page's HTML contains zero occurrences of the premium source
+(`curl …/components/crm-status-pill | grep -c CrmStatusPill` returns `0`), and the access-control
+suite asserts that no `403` response body ever contains source.
+
+**A second assumption, corrected with build evidence.** Importing the shared package from its barrel
+pulled `node:path` into the client bundle and broke the production build
+(`UnhandledSchemeError: Reading from "node:path"` during `next build`). I fixed it by adding
+browser-safe subpath exports (`@tech-inject/shared/contracts`) and importing those from client
+components, rather than shipping a Node polyfill — after which `pnpm build` passes 6/6.
+
+---
+
+## Time spent and known gaps
+
+**Time spent:** _fill in before submitting — total hours across Phase 1, Phase 2, the CRM UI pass and
+deployment._
+
+**Known gaps — implemented safeguards versus future work.**
+
+Implemented and verified (see [Results from this build](#results-from-this-build)): server-enforced
+premium access, draft isolation, constant-time admin auth with signed sessions, a
+path-traversal-proof installer, private bundle storage, RLS on every table, 130 automated tests, and
+a live deployment of both apps.
+
+Not implemented — these are future work, not claims:
+
+* **No billing.** "Upgrade to Premium" is intentionally inert; premium is granted by an
+  administrator. There is no payment integration and no payment data anywhere in the project.
+* **No public sign-up.** Customer accounts are created by seeding or in Supabase Auth directly.
+* **The preview registry is manual.** Interactive previews cover registered slugs
+  (`crm-metric-card`, `crm-status-pill`, `crm-action-button`, `crm-summary-card`); an unregistered
+  published component still shows its metadata, props and source, and states that no interactive
+  preview is registered. This is a deliberate security boundary, not an oversight.
+* **Rate limiting is per-instance.** It is in-memory, so on serverless a shared store (Redis or
+  Vercel KV) is needed for a strong guarantee.
+* **No admin audit log**, no per-request CSRF tokens (it relies on `SameSite` cookies), and customer
+  access tokens cannot be revoked before they expire.
+* **The CLI is not published to npm.** It builds and runs from `packages/cli/dist/cli.js`; publishing
+  needs the `@tech-inject` npm organisation. Its default registry URL still points at a placeholder
+  domain, so consumers set `TECH_INJECT_REGISTRY_URL`.
+* **Recreation screenshots** listed above still need capturing from the deployed URLs.
+* **Preview deployments share the production database** unless separate Preview variables are set.
