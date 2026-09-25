@@ -1,6 +1,6 @@
 # Required written answers
 
-Deployed commit: **`360fcf6`** — both Vercel projects build from this commit on `main`.
+Deployed commit: **`5f178f7`** — both Vercel projects build from this commit on `main`.
 
 References below point at real files and at test names that exist in the repository; every result
 quoted was produced by a command recorded in [README.md § Results](README.md#results-from-this-build).
