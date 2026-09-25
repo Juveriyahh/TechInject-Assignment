@@ -1,6 +1,7 @@
 # Required written answers
 
-Deployed commit: **`5f178f7`** — both Vercel projects build from this commit on `main`.
+Deployed commit: the tip of `main`, which both Vercel projects build automatically. The application
+code described below was last changed in **`40b073a`**; commits after it are documentation only.
 
 References below point at real files and at test names that exist in the repository; every result
 quoted was produced by a command recorded in [README.md § Results](README.md#results-from-this-build).
