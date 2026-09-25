@@ -337,17 +337,22 @@ Publish the CLI with `pnpm --filter @tech-inject/cli build && pnpm --filter @tec
 
 ## Screenshots
 
+All recreation shots were captured from the **deployed** apps at 1440 px (2× DPR); the reference is
+the image supplied with the brief.
+
 | Image | What it shows |
 | --- | --- |
-| [`docs/screenshots/reference-sales-crm.png`](docs/screenshots/reference-sales-crm.png) | The Sales CRM reference the theme and table were extracted from |
-| `docs/screenshots/admin-components.png` | Recreation: admin components table — tags with `+N`, readiness meters, trend sparklines, summary footer |
-| `docs/screenshots/admin-customers.png` | Recreation: customers table with grant/revoke |
-| `docs/screenshots/catalogue-free.png` | Catalogue: free component — interactive preview and all three integration tabs unlocked |
-| `docs/screenshots/catalogue-premium-locked.png` | Catalogue: premium component as a free/anonymous viewer — blurred preview and "Upgrade to Premium" |
-| `docs/screenshots/catalogue-premium-unlocked.png` | Catalogue: same page as a premium customer — source, install command and agent prompt |
+| [Reference](docs/screenshots/reference-sales-crm.png) | The Sales CRM reference the theme and table were extracted from |
+| [Admin — components](docs/screenshots/admin-components.png) | Recreation: components table — tags with `+N`, readiness meters, trend sparklines, selection checkboxes, summary footer |
+| [Admin — customers](docs/screenshots/admin-customers.png) | Recreation: customers table with grant / revoke |
+| [Admin — overview](docs/screenshots/admin-overview.png) | KPI tiles, recently updated, pipeline health meters |
+| [Catalogue — get started](docs/screenshots/catalogue-home.png) | Prerequisites, token CSS and install command |
+| [Catalogue — free component](docs/screenshots/catalogue-free.png) | Free component: interactive preview and all three integration tabs unlocked |
+| [Catalogue — premium locked](docs/screenshots/catalogue-premium-locked.png) | Premium component seen by an anonymous viewer: locked preview, "Sign in to continue" |
+| [Catalogue — premium unlocked](docs/screenshots/catalogue-premium-unlocked.png) | Same page as a premium customer: source, install command and agent prompt |
 
-Capture the recreation shots from the deployed URLs at ~1440 px wide; the reference image is the one
-supplied with the brief. See [Time spent and known gaps](#time-spent-and-known-gaps).
+The locked and unlocked pages are the same URL — the only difference is the session, which is what
+the server-side gate decides on.
 
 ---
 
@@ -510,8 +515,9 @@ components, rather than shipping a Node polyfill — after which `pnpm build` pa
 
 ## Time spent and known gaps
 
-**Time spent:** _fill in before submitting — total hours across Phase 1, Phase 2, the CRM UI pass and
-deployment._
+**Time spent:** ~4 hours end to end — Phase 1 (monorepo, database, design tokens, admin dashboard),
+Phase 2 (catalogue, premium enforcement, CLI, agent prompts, tests), the CRM UI pass against the
+reference, and deployment to Vercel + hosted Supabase.
 
 **Known gaps — implemented safeguards versus future work.**
 
@@ -536,5 +542,4 @@ Not implemented — these are future work, not claims:
 * **The CLI is not published to npm.** It builds and runs from `packages/cli/dist/cli.js`; publishing
   needs the `@tech-inject` npm organisation. Its default registry URL still points at a placeholder
   domain, so consumers set `TECH_INJECT_REGISTRY_URL`.
-* **Recreation screenshots** listed above still need capturing from the deployed URLs.
 * **Preview deployments share the production database** unless separate Preview variables are set.
