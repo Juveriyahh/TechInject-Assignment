@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Tech Inject design tokens.
+ *
+ * Extracted from a modern dark-first B2B SaaS CRM surface language: near-black
+ * neutral canvases, hairline borders, a violet brand accent, saturated tag
+ * hues on translucent fills, and amber selection affordances. Every value is
+ * expressed as raw HSL channels so Tailwind can compose them with opacity
+ * modifiers.
+ *
+ * Both themes ship. `:root` is the light theme; `.dark` on `<html>` switches to
+ * the CRM dark theme, which is what the product apps use by default.
+ */
+@layer base {
+  :root {
+    /* Neutral surfaces */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --surface: 0 0% 100%;
+    --surface-foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --elevated: 210 40% 96%;
+
+    /* Brand accent */
+    --primary: 243 75% 59%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary / muted / accent */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 243 100% 97%;
+    --accent-foreground: 243 75% 45%;
+
+    /* Semantic states */
+    --success: 142 71% 40%;
+    --success-foreground: 0 0% 100%;
+    --success-subtle: 141 79% 95%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 26 83% 14%;
+    --warning-subtle: 48 96% 93%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-subtle: 0 86% 97%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+
+    /* Selection affordance (checkboxes, selected rows) */
+    --selection: 38 92% 50%;
+    --selection-foreground: 26 83% 14%;
+
+    /* Categorical tag hues — CRM segments and stages */
+    --tag-blue: 217 91% 60%;
+    --tag-green: 142 69% 45%;
+    --tag-purple: 262 83% 68%;
+    --tag-amber: 32 95% 55%;
+    --tag-yellow: 45 93% 55%;
+    --tag-rose: 347 89% 65%;
+    --tag-cyan: 189 94% 48%;
+    --tag-slate: 215 16% 55%;
+
+    /* Data visualisation ramp — meters and sparklines */
+    --chart-low: 0 84% 60%;
+    --chart-mid: 38 92% 55%;
+    --chart-high: 142 69% 45%;
+    --chart-track: 214 32% 88%;
+
+    /* Lines & focus */
+    --border: 214 32% 91%;
+    --border-strong: 214 25% 84%;
+    --input: 214 32% 91%;
+    --ring: 243 75% 59%;
+
+    /* Radii */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+  }
+
+  .dark {
+    /* Near-black neutrals with a faint cool cast */
+    --background: 240 6% 4%;
+    --foreground: 240 10% 96%;
+    --surface: 240 6% 6%;
+    --surface-foreground: 240 10% 96%;
+    --card: 240 5% 8%;
+    --card-foreground: 240 10% 96%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 240 10% 96%;
+    --elevated: 240 5% 12%;
+
+    --primary: 243 75% 62%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 13%;
+    --secondary-foreground: 240 10% 92%;
+    --muted: 240 5% 11%;
+    --muted-foreground: 240 5% 58%;
+    --accent: 243 45% 20%;
+    --accent-foreground: 243 100% 88%;
+
+    --success: 142 69% 48%;
+    --success-foreground: 144 80% 6%;
+    --success-subtle: 143 55% 12%;
+    --warning: 38 92% 58%;
+    --warning-foreground: 38 95% 88%;
+    --warning-subtle: 33 60% 13%;
+    --destructive: 0 84% 62%;
+    --destructive-foreground: 0 0% 100%;
+    --destructive-subtle: 0 55% 14%;
+    --info: 217 91% 65%;
+    --info-foreground: 222 47% 9%;
+
+    --selection: 38 96% 55%;
+    --selection-foreground: 26 90% 8%;
+
+    --tag-blue: 217 91% 68%;
+    --tag-green: 142 69% 52%;
+    --tag-purple: 262 83% 74%;
+    --tag-amber: 32 95% 62%;
+    --tag-yellow: 45 93% 62%;
+    --tag-rose: 347 89% 70%;
+    --tag-cyan: 189 94% 55%;
+    --tag-slate: 240 6% 65%;
+
+    --chart-low: 0 84% 62%;
+    --chart-mid: 38 92% 58%;
+    --chart-high: 142 69% 50%;
+    --chart-track: 240 5% 18%;
+
+    --border: 240 5% 14%;
+    --border-strong: 240 5% 20%;
+    --input: 240 5% 18%;
+    --ring: 243 75% 62%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01', 'tnum';
+    letter-spacing: -0.011em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-semibold tracking-tight text-foreground;
+  }
+
+  /* Thin, unobtrusive scrollbars to match the dense CRM surfaces. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border-strong)) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border-strong));
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "slug": "crm-metric-card",
+  "name": "CRM Metric Card",
+  "description": "Displays key performance indicators with comparative deltas.",
+  "category": "Data Display",
+  "tier": "FREE",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": {
+      "lucide-react": "^0.300.0"
+    },
+    "internal": [
+      "Card",
+      "Badge"
+    ]
+  },
+  "propsSchema": [
+    {
+      "name": "title",
+      "type": "string",
+      "required": true,
+      "default": "Total Revenue"
+    },
+    {
+      "name": "value",
+      "type": "string",
+      "required": true,
+      "default": "$45,231"
+    },
+    {
+      "name": "delta",
+      "type": "string",
+      "required": false,
+      "default": "+12.5%"
+    },
+    {
+      "name": "trend",
+      "type": "enum",
+      "required": false,
+      "default": "up",
+      "options": [
+        "up",
+        "down",
+        "flat"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "filePath": "components/data-metric.tsx",
+      "fileType": "SOURCE",
+      "content": "import * as React from 'react';\nimport { ArrowDownRight, ArrowUpRight } from 'lucide-react';\n\nexport type MetricTrend = 'up' | 'down' | 'flat';\n\nexport interface CrmMetricCardProps {\n  title: string;\n  value: string;\n  delta?: string;\n  trend?: MetricTrend;\n}\n\n/** Compact KPI tile for CRM dashboards. */\nexport function CrmMetricCard({ title, value, delta, trend = 'up' }: CrmMetricCardProps) {\n  const Icon = trend === 'down' ? ArrowDownRight : ArrowUpRight;\n  const tone = trend === 'down' ? 'text-red-600 bg-red-50' : 'text-emerald-600 bg-emerald-50';\n\n  return (\n    <div className=\"rounded-lg border border-slate-200 bg-white p-4 shadow-sm\">\n      <p className=\"text-xs font-medium uppercase tracking-wide text-slate-500\">{title}</p>\n      <div className=\"mt-2 flex items-end justify-between gap-3\">\n        <span className=\"text-2xl font-semibold tracking-tight text-slate-900\">{value}</span>\n        {delta ? (\n          <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${tone}`}>\n            <Icon className=\"h-3 w-3\" />\n            {delta}\n          </span>\n        ) : null}\n      </div>\n    </div>\n  );\n}\n"
+    },
+    {
+      "filePath": "fixtures/data-metric-preview.tsx",
+      "fileType": "PREVIEW_FIXTURE",
+      "content": "import * as React from 'react';\nimport { CrmMetricCard } from '../components/data-metric';\n\n/** Preview fixture rendered by the catalogue and the admin draft inspector. */\nexport default function CrmMetricCardPreview() {\n  return (\n    <div className=\"grid gap-3 sm:grid-cols-2\">\n      <CrmMetricCard title=\"Total Revenue\" value=\"$45,231\" delta=\"+12.5%\" trend=\"up\" />\n      <CrmMetricCard title=\"Churned Accounts\" value=\"18\" delta=\"-3.1%\" trend=\"down\" />\n    </div>\n  );\n}\n"
+    }
+  ]
+}

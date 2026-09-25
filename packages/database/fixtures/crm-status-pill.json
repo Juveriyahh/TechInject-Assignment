@@ -1,0 +1,53 @@
+{
+  "slug": "crm-status-pill",
+  "name": "CRM Status Pill",
+  "description": "Compact status indicator for pipeline stages, with semantic tones and an optional dot.",
+  "category": "Data Display",
+  "tier": "PREMIUM",
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": {},
+    "internal": [
+      "Badge"
+    ]
+  },
+  "propsSchema": [
+    {
+      "name": "children",
+      "type": "string",
+      "required": true,
+      "default": "Qualified"
+    },
+    {
+      "name": "variant",
+      "type": "enum",
+      "required": false,
+      "default": "success",
+      "options": [
+        "success",
+        "warning",
+        "error",
+        "neutral",
+        "brand"
+      ]
+    },
+    {
+      "name": "withDot",
+      "type": "boolean",
+      "required": false,
+      "default": true
+    }
+  ],
+  "files": [
+    {
+      "filePath": "components/status-pill.tsx",
+      "fileType": "SOURCE",
+      "content": "import * as React from 'react';\n\nexport type StatusTone = 'success' | 'warning' | 'error' | 'neutral' | 'brand';\n\nexport interface CrmStatusPillProps {\n  children: React.ReactNode;\n  variant?: StatusTone;\n  withDot?: boolean;\n}\n\nconst tones: Record<StatusTone, string> = {\n  success: 'border-success/20 bg-success-subtle text-success',\n  warning: 'border-warning/25 bg-warning-subtle text-warning-foreground',\n  error: 'border-destructive/20 bg-destructive-subtle text-destructive',\n  neutral: 'border-border bg-muted text-muted-foreground',\n  brand: 'border-primary/20 bg-accent text-accent-foreground'\n};\n\n/** Pipeline status pill for CRM tables and detail headers. */\nexport function CrmStatusPill({ children, variant = 'success', withDot = true }: CrmStatusPillProps) {\n  return (\n    <span\n      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium ${tones[variant]}`}\n    >\n      {withDot ? <span aria-hidden className=\"h-1.5 w-1.5 rounded-sm bg-current\" /> : null}\n      {children}\n    </span>\n  );\n}\n"
+    },
+    {
+      "filePath": "fixtures/status-pill-preview.tsx",
+      "fileType": "PREVIEW_FIXTURE",
+      "content": "import * as React from 'react';\nimport { CrmStatusPill } from '../components/status-pill';\n\n/** Preview fixture rendered by the catalogue. */\nexport default function CrmStatusPillPreview() {\n  return (\n    <div className=\"flex flex-wrap gap-2\">\n      <CrmStatusPill variant=\"success\">Qualified</CrmStatusPill>\n      <CrmStatusPill variant=\"warning\">Needs follow-up</CrmStatusPill>\n      <CrmStatusPill variant=\"error\">Churn risk</CrmStatusPill>\n    </div>\n  );\n}\n"
+    }
+  ]
+}
